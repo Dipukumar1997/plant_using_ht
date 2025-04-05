@@ -167,21 +167,25 @@ class_names = [
 async def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 @app.post("/predict")
-async def predict(file: UploadFile = File(...)):
+@app.post("/predict")
+async def predict(file: bytes = Form(...)):
     try:
-        contents = await file.read()
-        image = Image.open(io.BytesIO(contents)).convert("RGB")
-        image = image.resize((256, 256))
+        # 🖼️ Load and preprocess the image
+        image = Image.open(io.BytesIO(file)).convert("RGB")
+        image = image.resize((224, 224))  # 👈 Use correct dimensions based on your model
         image_array = np.array(image) / 255.0
-        image_array = np.expand_dims(image_array, axis=0)
+        image_array = image_array.reshape(1, 25088)  # 👈 Flatten the image to (1, 25088)
 
+        # 🧠 Predict using the model
         predictions = model.predict(image_array)
         predicted_class_index = np.argmax(predictions[0])
         predicted_class = class_names[predicted_class_index]
         confidence = round(100 * np.max(predictions[0]), 2)
 
+        # 🧬 Get treatment or cure
         treatment = get_cure(predicted_class)
 
+        # 📤 Return result
         return JSONResponse(content={
             "prediction": predicted_class,
             "confidence": confidence,
