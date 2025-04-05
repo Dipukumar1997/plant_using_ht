@@ -96,20 +96,31 @@
 
 
 
-import os
+# import os
+# from fastapi.staticfiles import StaticFiles
+# from fastapi.responses import HTMLResponse, FileResponse
+# import io
+# import numpy as np
+# import tensorflow as tf
+# from PIL import Image
+# from fastapi import FastAPI, File, UploadFile
+# from fastapi.middleware.cors import CORSMiddleware
+# from fastapi.responses import JSONResponse
+# from dotenv import load_dotenv
+# import wikipedia
+# import gdown
+# from gemini import  get_gemini_response
+
+from fastapi import FastAPI, Request, Form
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse, FileResponse
-import io
+import uvicorn
 import numpy as np
-import tensorflow as tf
+from tensorflow.keras.models import load_model
 from PIL import Image
-from fastapi import FastAPI, File, UploadFile
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-from dotenv import load_dotenv
-import wikipedia
-import gdown
-from gemini import get_cure, get_gemini_response
+import io
+from gemini import get_cure, get_gemini_response 
 
 load_dotenv()
 app = FastAPI()
@@ -152,37 +163,68 @@ class_names = [
 ]
 
 # Prediction function
-def predict_image(image_data):
-    image = Image.open(io.BytesIO(image_data)).resize((128, 128))
-    img_array = np.array(image) / 255.0
-    img_array = np.expand_dims(img_array, axis=0)
-    prediction = model.predict(img_array)
-    return class_names[np.argmax(prediction)]
+# def predict_image(image_data):
+#     image = Image.open(io.BytesIO(image_data)).resize((128, 128))
+#     img_array = np.array(image) / 255.0
+#     img_array = np.expand_dims(img_array, axis=0)
+#     prediction = model.predict(img_array)
+#     return class_names[np.argmax(prediction)]
 
 
 @app.get("/", response_class=HTMLResponse)
-def serve_homepage():
-    return FileResponse("static/index.html")
+async def home(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
 
 
-# Endpoint: Predict
-@app.post("/predict")
-async def predict(file: UploadFile = File(...)):
-    image_data = await file.read()
-    prediction = predict_image(image_data)
-    return {"prediction": prediction}
+# # Endpoint: Predict
+# @app.post("/predict")
+# async def predict(file: UploadFile = File(...)):
+#     image_data = await file.read()
+#     prediction = predict_image(image_data)
+#     return {"prediction": prediction}
 
-# Endpoint: Info
-@app.get("/info")
-async def get_disease_info(name: str):
+# # Endpoint: Info
+# @app.get("/info")
+# async def get_disease_info(name: str):
+#     try:
+#         summary = wikipedia.summary(name, sentences=3)
+#         cure_prompt = (
+#             f"Explain in simple, clear, and human-readable language how to manage or cure '{name}'. "
+#             "Include natural methods, chemical treatments (if any), and practical tips. "
+#             "Use bullet points and sections if needed. Avoid technical jargon. Use markdown formatting."
+#         )
+#         cure = get_gemini_response(cure_prompt)
+#         return {"summary": summary, "cure": cure}
+#     except Exception as e:
+#         return {"summary": "No summary available.", "cure": "No cure information available."}
+
+@app.post("/predict", response_class=HTMLResponse)
+async def predict(request: Request, file: bytes = Form(...)):
     try:
-        summary = wikipedia.summary(name, sentences=3)
-        cure_prompt = (
-            f"Explain in simple, clear, and human-readable language how to manage or cure '{name}'. "
-            "Include natural methods, chemical treatments (if any), and practical tips. "
-            "Use bullet points and sections if needed. Avoid technical jargon. Use markdown formatting."
-        )
-        cure = get_gemini_response(cure_prompt)
-        return {"summary": summary, "cure": cure}
+        image = Image.open(io.BytesIO(file)).convert("RGB")
+        image = image.resize((256, 256))
+        image_array = np.array(image) / 255.0
+        image_array = np.expand_dims(image_array, axis=0)
+
+        predictions = model.predict(image_array)
+        predicted_class_index = np.argmax(predictions[0])
+        predicted_class = class_names[predicted_class_index]
+        confidence = round(100 * np.max(predictions[0]), 2)
+
+        # ✅ Use get_cure here to get treatment
+        treatment = get_cure(predicted_class)
+
+        return templates.TemplateResponse("result.html", {
+            "request": request,
+            "prediction": predicted_class,
+            "confidence": confidence,
+            "treatment": treatment
+        })
+
     except Exception as e:
-        return {"summary": "No summary available.", "cure": "No cure information available."}
+        return templates.TemplateResponse("result.html", {
+            "request": request,
+            "prediction": "Error",
+            "confidence": 0,
+            "treatment": str(e)
+        })
