@@ -171,9 +171,9 @@ async def predict(file: UploadFile = File(...)):
     try:
         contents = await file.read()
         image = Image.open(io.BytesIO(contents)).convert("RGB")
-        image = image.resize((224, 224))  # use the correct size expected by your model
+        image = image.resize((126, 126))  # ✅ resize to the correct shape
         image_array = np.array(image) / 255.0
-        image_array = image_array.reshape(1, 25088)  # adjust shape based on model input
+        image_array = image_array.reshape(1, 126, 126, 3)  # ✅ match model's input shape
 
         predictions = model.predict(image_array)
         predicted_class_index = np.argmax(predictions[0])
