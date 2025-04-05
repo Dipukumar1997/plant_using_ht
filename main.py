@@ -151,6 +151,7 @@ gdown.download(url, output, quiet=False)
 model = tf.keras.models.load_model("plant_disease_model.h5")
 
 # Serve static files (your frontend)
+# app.mount("/templates", StaticFiles(directory="templates"), name="templates")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Class names
