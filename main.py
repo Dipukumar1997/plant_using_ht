@@ -111,6 +111,7 @@
 # import gdown
 # from gemini import  get_gemini_response
 
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, Request, Form
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
