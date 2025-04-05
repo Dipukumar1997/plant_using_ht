@@ -121,6 +121,7 @@ import numpy as np
 from tensorflow.keras.models import load_model
 from PIL import Image
 import io
+import gdown
 from gemini import get_cure, get_gemini_response  # All good here
 
 
