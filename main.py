@@ -129,8 +129,7 @@ from fastapi.staticfiles import StaticFiles
 import gdown
 from gemini import get_cure, get_gemini_response  # All good here
 
-templates = Jinja2Templates(directory="templates")
-# load_dotenv()
+templates = Jinja2Templates(directory="templates")# load_dotenv()
 app = FastAPI()
 
 # Enable CORS
@@ -152,7 +151,7 @@ model = tf.keras.models.load_model("plant_disease_model.h5")
 
 # Serve static files (your frontend)
 # app.mount("/templates", StaticFiles(directory="templates"), name="templates")
-app.mount("/static", StaticFiles(directory="static"), name="static")
+# app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Class names
 class_names = [
