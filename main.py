@@ -140,20 +140,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# Download model from Google Drive
 url = "https://drive.google.com/uc?id=1Ms1HkwFo7im2Yh6V9Hn90jE_qERJl96y"
 output = "plant_disease_model.h5"
 gdown.download(url, output, quiet=False)
-
 # Load model
 model = tf.keras.models.load_model("plant_disease_model.h5")
 
-# Serve static files (your frontend)
-# app.mount("/templates", StaticFiles(directory="templates"), name="templates")
-# app.mount("/static", StaticFiles(directory="static"), name="static")
-
-# Class names
 class_names = [
     'Apple___Apple_scab', 'Apple___Black_rot', 'Apple___Cedar_apple_rust', 'Apple___healthy',
     'Blueberry___healthy', 'Cherry_(including_sour)___Powdery_mildew', 'Cherry_(including_sour)___healthy',
@@ -170,41 +162,10 @@ class_names = [
     'Tomato___healthy'
 ]
 
-# Prediction function
-# def predict_image(image_data):
-#     image = Image.open(io.BytesIO(image_data)).resize((128, 128))
-#     img_array = np.array(image) / 255.0
-#     img_array = np.expand_dims(img_array, axis=0)
-#     prediction = model.predict(img_array)
-#     return class_names[np.argmax(prediction)]
-
 
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
-
-
-# # Endpoint: Predict
-# @app.post("/predict")
-# async def predict(file: UploadFile = File(...)):
-#     image_data = await file.read()
-#     prediction = predict_image(image_data)
-#     return {"prediction": prediction}
-
-# # Endpoint: Info
-# @app.get("/info")
-# async def get_disease_info(name: str):
-#     try:
-#         summary = wikipedia.summary(name, sentences=3)
-#         cure_prompt = (
-#             f"Explain in simple, clear, and human-readable language how to manage or cure '{name}'. "
-#             "Include natural methods, chemical treatments (if any), and practical tips. "
-#             "Use bullet points and sections if needed. Avoid technical jargon. Use markdown formatting."
-#         )
-#         cure = get_gemini_response(cure_prompt)
-#         return {"summary": summary, "cure": cure}
-#     except Exception as e:
-#         return {"summary": "No summary available.", "cure": "No cure information available."}
 
 @app.post("/predict")
 async def predict(file: bytes = Form(...)):
@@ -233,3 +194,47 @@ async def predict(file: bytes = Form(...)):
             "confidence": 0,
             "cure": str(e)
         })
+    
+
+
+
+# Serve static files (your frontend)
+# app.mount("/templates", StaticFiles(directory="templates"), name="templates")
+# app.mount("/static", StaticFiles(directory="static"), name="static")
+
+# Class names
+
+
+
+
+# # Endpoint: Predict
+# @app.post("/predict")
+# async def predict(file: UploadFile = File(...)):
+#     image_data = await file.read()
+#     prediction = predict_image(image_data)
+#     return {"prediction": prediction}
+
+# # Endpoint: Info
+# @app.get("/info")
+# async def get_disease_info(name: str):
+#     try:
+#         summary = wikipedia.summary(name, sentences=3)
+#         cure_prompt = (
+#             f"Explain in simple, clear, and human-readable language how to manage or cure '{name}'. "
+#             "Include natural methods, chemical treatments (if any), and practical tips. "
+#             "Use bullet points and sections if needed. Avoid technical jargon. Use markdown formatting."
+#         )
+#         cure = get_gemini_response(cure_prompt)
+#         return {"summary": summary, "cure": cure}
+#     except Exception as e:
+#         return {"summary": "No summary available.", "cure": "No cure information available."}
+
+
+
+# Prediction function
+# def predict_image(image_data):
+#     image = Image.open(io.BytesIO(image_data)).resize((128, 128))
+#     img_array = np.array(image) / 255.0
+#     img_array = np.expand_dims(img_array, axis=0)
+#     prediction = model.predict(img_array)
+#     return class_names[np.argmax(prediction)]

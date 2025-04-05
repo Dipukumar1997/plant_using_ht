@@ -166,56 +166,50 @@
       const cure = document.getElementById("cure");
       const overviewBox = document.getElementById("overviewBox");
       const cureBox = document.getElementById("cureBox");
-
+    
       if (!input.files.length) {
         alert("Please upload an image.");
         return;
       }
-
+    
       spinner.style.display = "block";
       result.innerText = "";
       summary.innerText = "";
       cure.innerText = "";
       overviewBox.style.display = "none";
       cureBox.style.display = "none";
-
+    
       const formData = new FormData();
       formData.append("file", input.files[0]);
-
+    
       try {
         const response = await fetch("/predict", {
           method: "POST",
           body: formData
         });
-      
+    
         if (!response.ok) throw new Error("Prediction request failed");
-      
+    
         const data = await response.json();
+        console.log("Fetched prediction data:", data);
+    
         result.innerText = "🧪 Prediction: " + data.prediction;
-      
-        const infoResponse = await fetch(`/info?name=${encodeURIComponent(data.prediction)}`);
-        if (!infoResponse.ok) throw new Error("Info request failed");
-      
-        const infoData = await infoResponse.json();
-        console.log("Fetched infoData:", infoData);
-      
-        summary.innerText = infoData.summary || "No summary available.";
-      
+        summary.innerText = "Confidence: " + data.confidence + "%";
+    
         // Safe markdown parse
-        cure.innerHTML = infoData.cure ? marked.parse(infoData.cure) : "No cure info available.";
-      
+        cure.innerHTML = data.cure ? marked.parse(data.cure) : "No cure info available.";
+    
         overviewBox.style.display = "block";
         cureBox.style.display = "block";
-      
+    
       } catch (error) {
         console.error("Prediction error:", error);
-        alert("❌ Error while predicting or fetching info.");
+        alert("❌ Error while predicting.");
       } finally {
         spinner.style.display = "none";
       }
-      
-
     }
+    
   </script>
 </body>
 
