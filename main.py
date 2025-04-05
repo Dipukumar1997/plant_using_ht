@@ -206,8 +206,8 @@ async def home(request: Request):
 #     except Exception as e:
 #         return {"summary": "No summary available.", "cure": "No cure information available."}
 
-@app.post("/predict", response_class=HTMLResponse)
-async def predict(request: Request, file: bytes = Form(...)):
+@app.post("/predict")
+async def predict(file: bytes = Form(...)):
     try:
         image = Image.open(io.BytesIO(file)).convert("RGB")
         image = image.resize((256, 256))
@@ -219,20 +219,17 @@ async def predict(request: Request, file: bytes = Form(...)):
         predicted_class = class_names[predicted_class_index]
         confidence = round(100 * np.max(predictions[0]), 2)
 
-        # ✅ Use get_cure here to get treatment
         treatment = get_cure(predicted_class)
 
-        return templates.TemplateResponse("result.html", {
-            "request": request,
+        return JSONResponse(content={
             "prediction": predicted_class,
             "confidence": confidence,
-            "treatment": treatment
+            "cure": treatment  # This will go to `marked.parse()` in JS
         })
 
     except Exception as e:
-        return templates.TemplateResponse("result.html", {
-            "request": request,
+        return JSONResponse(content={
             "prediction": "Error",
             "confidence": 0,
-            "treatment": str(e)
+            "cure": str(e)
         })
