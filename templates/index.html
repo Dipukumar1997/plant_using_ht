@@ -112,9 +112,19 @@
   
     /* Media Query for mobile */
     @media (max-width: 768px) {
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+      }
+  
       #drop-area {
-        width: 50%; /* Takes up half the screen width */
+        width: 50%;  /* Takes up half the screen width */
         padding: 20px;
+        margin-top: 20px;  /* Space from the top */
+        border-radius: 12px; /* Slightly more rounded corners */
       }
   
       h1 {
@@ -131,6 +141,7 @@
       }
     }
   </style>
+  
   
 </head>
 
