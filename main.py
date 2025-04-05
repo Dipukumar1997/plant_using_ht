@@ -96,20 +96,20 @@
 
 
 
-# import os
-# from fastapi.staticfiles import StaticFiles
-# from fastapi.responses import HTMLResponse, FileResponse
-# import io
-# import numpy as np
-# import tensorflow as tf
-# from PIL import Image
-# from fastapi import FastAPI, File, UploadFile
-# from fastapi.middleware.cors import CORSMiddleware
-# from fastapi.responses import JSONResponse
-# from dotenv import load_dotenv
-# import wikipedia
-# import gdown
-# from gemini import  get_gemini_response
+import os
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import HTMLResponse, FileResponse
+import io
+import numpy as np
+import tensorflow as tf
+from PIL import Image
+from fastapi import FastAPI, File, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from dotenv import load_dotenv
+import wikipedia
+import gdown
+from gemini import  get_gemini_response
 
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, Request, Form
