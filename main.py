@@ -120,9 +120,10 @@ import numpy as np
 from tensorflow.keras.models import load_model
 from PIL import Image
 import io
-from gemini import get_cure, get_gemini_response 
+from gemini import get_cure, get_gemini_response  # All good here
 
-load_dotenv()
+
+# load_dotenv()
 app = FastAPI()
 
 # Enable CORS
