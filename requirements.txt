@@ -7,3 +7,4 @@ python-dotenv
 wikipedia
 google-generativeai
 gdown
+jinja2
