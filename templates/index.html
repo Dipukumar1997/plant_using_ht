@@ -201,6 +201,7 @@
         cureBox.style.display = "block";
 
       } catch (error) {
+        console.error("Prediction error:", error);
         alert("❌ Error while predicting or fetching info.");
       } finally {
         spinner.style.display = "none";
