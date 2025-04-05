@@ -97,6 +97,7 @@
 
 
 import os
+from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, FileResponse
 import io
@@ -121,10 +122,14 @@ import numpy as np
 from tensorflow.keras.models import load_model
 from PIL import Image
 import io
+from fastapi import FastAPI, Request
+from fastapi.templating import Jinja2Templates
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 import gdown
 from gemini import get_cure, get_gemini_response  # All good here
 
-
+templates = Jinja2Templates(directory="templates")
 # load_dotenv()
 app = FastAPI()
 
