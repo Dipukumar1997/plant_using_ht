@@ -183,7 +183,7 @@
       formData.append("file", input.files[0]);
 
       try {
-        const response = await fetch("http://localhost:8000/predict", {
+        const response = await fetch("/predict", {
           method: "POST",
           body: formData
         });
@@ -191,7 +191,7 @@
         const data = await response.json();
         result.innerText = "🧪 Prediction: " + data.prediction;
 
-        const infoResponse = await fetch(`http://localhost:8000/info?name=${data.prediction}`);
+        const infoResponse = await fetch(`/info?name=${encodeURIComponent(data.prediction)}`);
         const infoData = await infoResponse.json();
 
         summary.innerText = infoData.summary;
@@ -205,6 +205,7 @@
       } finally {
         spinner.style.display = "none";
       }
+
     }
   </script>
 </body>
