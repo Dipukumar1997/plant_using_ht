@@ -166,23 +166,74 @@ class_names = [
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
+# @app.post("/predict")
+# async def predict(file: UploadFile = File(...)):
+#     try:
+#         contents = await file.read()
+#         image = Image.open(io.BytesIO(contents)).convert("RGB")
+#         image = image.resize((126, 126))  # use the correct size expected by your model
+#         image_array = np.array(image) / 255.0
+#         image_array = image_array.reshape(1, 126, 126, 3)
+
+#         predictions = model.predict(image_array)
+#         predicted_class_index = np.argmax(predictions[0])
+#         predicted_class = class_names[predicted_class_index]
+#         confidence = float(round(100 * np.max(predictions[0]), 2))  # ✅ cast to native float
+#         treatment = get_cure(predicted_class)
+
+#         return JSONResponse(content={
+#             "prediction": predicted_class,
+#             "confidence": confidence,
+#             "cure": treatment
+#         })
+
+#     except Exception as e:
+#         return JSONResponse(content={
+#             "prediction": "Error",
+#             "confidence": 0,
+#             "cure": str(e)
+#         })
+
+
+
+
 @app.post("/predict")
 async def predict(file: UploadFile = File(...)):
     try:
+        # Read the image file from the upload
         contents = await file.read()
         image = Image.open(io.BytesIO(contents)).convert("RGB")
-        image = image.resize((126, 126))  # use the correct size expected by your model
+        image = image.resize((126, 126))  # resize to expected input size for the model
         image_array = np.array(image) / 255.0
-        image_array = image_array.reshape(1, 126, 126, 3)
+        image_array = image_array.reshape(1, 126, 126, 3)  # adjust shape as per model's expected input
 
+        # Make predictions using the loaded model
         predictions = model.predict(image_array)
         predicted_class_index = np.argmax(predictions[0])
         predicted_class = class_names[predicted_class_index]
-        confidence = float(round(100 * np.max(predictions[0]), 2))  # ✅ cast to native float
+
+        # Get the Wikipedia overview for the predicted disease
+        try:
+            disease_overview = wikipedia.summary(predicted_class, sentences=3)  # Fetch first 3 sentences from Wikipedia
+        except wikipedia.exceptions.DisambiguationError as e:
+            disease_overview = f"Multiple results found. Please be more specific. Possible options: {e.options}"
+        except wikipedia.exceptions.HTTPTimeoutError:
+            disease_overview = "Wikipedia request timed out. Please try again later."
+        except wikipedia.exceptions.RedirectError:
+            disease_overview = "The disease page is redirecting, unable to fetch details."
+        except Exception as e:
+            disease_overview = f"An error occurred while fetching the Wikipedia summary: {str(e)}"
+
+        # Calculate the confidence
+        confidence = float(round(100 * np.max(predictions[0]), 2))  # Convert to native float
+
+        # Get the treatment (you should implement `get_cure()` to provide this)
         treatment = get_cure(predicted_class)
 
+        # Return the response with the prediction, Wikipedia overview, and treatment
         return JSONResponse(content={
             "prediction": predicted_class,
+            "overview": disease_overview,
             "confidence": confidence,
             "cure": treatment
         })
@@ -190,10 +241,12 @@ async def predict(file: UploadFile = File(...)):
     except Exception as e:
         return JSONResponse(content={
             "prediction": "Error",
+            "overview": str(e),
             "confidence": 0,
-            "cure": str(e)
+            "cure": "Error"
         })
-
+    
+    
 # Serve static files (your frontend)
 # app.mount("/templates", StaticFiles(directory="templates"), name="templates")
 # app.mount("/static", StaticFiles(directory="static"), name="static")

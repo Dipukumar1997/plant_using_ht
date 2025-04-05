@@ -194,7 +194,7 @@
         console.log("Fetched prediction data:", data);
     
         result.innerText = "🧪 Prediction: " + data.prediction;
-        summary.innerText = "Confidence: " + data.confidence + "%";
+        summary.innerText = "📝 Overview (Wikipedia): " + data.overview;  // Update with Wikipedia summary
     
         // Safe markdown parse
         cure.innerHTML = data.cure ? marked.parse(data.cure) : "No cure info available.";
