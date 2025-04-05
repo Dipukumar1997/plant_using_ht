@@ -166,11 +166,11 @@ class_names = [
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
-
 @app.post("/predict")
-async def predict(file: bytes = Form(...)):
+async def predict(file: UploadFile = File(...)):
     try:
-        image = Image.open(io.BytesIO(file)).convert("RGB")
+        contents = await file.read()
+        image = Image.open(io.BytesIO(contents)).convert("RGB")
         image = image.resize((256, 256))
         image_array = np.array(image) / 255.0
         image_array = np.expand_dims(image_array, axis=0)
@@ -185,7 +185,7 @@ async def predict(file: bytes = Form(...)):
         return JSONResponse(content={
             "prediction": predicted_class,
             "confidence": confidence,
-            "cure": treatment  # This will go to `marked.parse()` in JS
+            "cure": treatment
         })
 
     except Exception as e:
@@ -194,8 +194,6 @@ async def predict(file: bytes = Form(...)):
             "confidence": 0,
             "cure": str(e)
         })
-    
-
 
 
 # Serve static files (your frontend)
