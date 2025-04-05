@@ -187,25 +187,33 @@
           method: "POST",
           body: formData
         });
-
+      
+        if (!response.ok) throw new Error("Prediction request failed");
+      
         const data = await response.json();
         result.innerText = "🧪 Prediction: " + data.prediction;
-
+      
         const infoResponse = await fetch(`/info?name=${encodeURIComponent(data.prediction)}`);
+        if (!infoResponse.ok) throw new Error("Info request failed");
+      
         const infoData = await infoResponse.json();
-
-        summary.innerText = infoData.summary;
-        cure.innerHTML = marked.parse(infoData.cure); // Render markdown here
-
+        console.log("Fetched infoData:", infoData);
+      
+        summary.innerText = infoData.summary || "No summary available.";
+      
+        // Safe markdown parse
+        cure.innerHTML = infoData.cure ? marked.parse(infoData.cure) : "No cure info available.";
+      
         overviewBox.style.display = "block";
         cureBox.style.display = "block";
-
+      
       } catch (error) {
         console.error("Prediction error:", error);
         alert("❌ Error while predicting or fetching info.");
       } finally {
         spinner.style.display = "none";
       }
+      
 
     }
   </script>
