@@ -1,0 +1,8 @@
+*.h5
+__pycache__/
+*.pyc
+.env
+*.zip
+*.tar
+.DS_Store
+NUL
